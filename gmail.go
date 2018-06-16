@@ -12,6 +12,7 @@ import (
 	"strings"
 	"errors"
 	"os"
+	"github.com/nlopes/slack"
 )
 
 type token struct {
@@ -19,6 +20,8 @@ type token struct {
 	ClientSecret string `json:"clientSecret"`
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
+	SlackToken   string `json:"slackToken"`
+	SlackChannel string `json:"slackChannel"`
 }
 
 type file struct {
@@ -50,7 +53,7 @@ func getToken() (*token, error) {
 
 }
 
-func getGmailService(tk *token) (*gmail.Service, error) {
+func (tk *token) getGmailService() (*gmail.Service, error) {
 	config := oauth2.Config{
 		ClientID:     tk.ClientId,
 		ClientSecret: tk.ClientSecret,
@@ -161,12 +164,28 @@ func (fl *file) handleFile() error {
 	return nil
 }
 
+func (fl *file) postSlack(token *token) error {
+	api := slack.New(token.SlackToken)
+	file := slack.FileUploadParameters{
+		File:           "./file/" + fl.filename,
+		Filetype:       "pdf",
+		InitialComment: "agenda",
+		Title:          fl.filename,
+		Channels:       []string{token.SlackChannel},
+	}
+	_, err := api.UploadFile(file)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func main() {
 	token, err := getToken()
 	if err != nil {
 		fmt.Errorf("token error: %v", err)
 	}
-	srv, err := getGmailService(token)
+	srv, err := token.getGmailService()
 	if err != nil {
 		fmt.Errorf("getService error: %v", err)
 	}
@@ -191,6 +210,10 @@ func main() {
 			err = fl.handleFile()
 			if err != nil {
 				fmt.Errorf("handle file error: %v", err)
+			}
+			err = fl.postSlack(token)
+			if err != nil {
+				fmt.Errorf("slack error: %v", err)
 			}
 			return
 		}
