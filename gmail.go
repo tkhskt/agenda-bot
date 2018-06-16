@@ -107,6 +107,28 @@ func getFileFromMessage(part *gmail.MessagePart, srv *gmail.Service, ms *gmail.M
 	return dec, nil
 }
 
+func (fl *file) saveFileName() error {
+	file, err := os.Create(`filename.txt`)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	file.Write(([]byte)(fl.filename))
+	return nil
+}
+
+func (fl *file) isLatestFile() (bool, error) {
+	b, err := ioutil.ReadFile("filename.txt") // just pass the file name
+	if err != nil {
+		return false, err
+	}
+	if string(b) != fl.filename {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func searchFileFromMessage(part []*gmail.MessagePart, ms *gmail.Message, srv *gmail.Service) (*file, error) {
 	for _, v := range part {
 		if strings.Contains(v.Filename, "アジェンダ") {
@@ -114,10 +136,29 @@ func searchFileFromMessage(part []*gmail.MessagePart, ms *gmail.Message, srv *gm
 			if err != nil {
 				return nil, err
 			}
-			return &file{v.Filename, dec}, nil
+			fl := &file{v.Filename, dec}
+			return fl, nil
 		}
 	}
 	return nil, nil
+}
+
+func (fl *file) handleFile() error {
+	fileIsLatest, err := fl.isLatestFile()
+	if err != nil {
+		fmt.Errorf("file latest error: %v", err)
+	}
+	if fileIsLatest {
+		err = fl.saveFileName()
+		if err != nil {
+			fmt.Errorf("save file name error: %v", err)
+		}
+		err = fl.createFile()
+		if err != nil {
+			fmt.Errorf("create file error: %v", err)
+		}
+	}
+	return nil
 }
 
 func main() {
@@ -147,12 +188,11 @@ func main() {
 			fmt.Errorf("search file error: %v", err)
 		}
 		if fl != nil {
-			err = fl.createFile()
+			err = fl.handleFile()
 			if err != nil {
-				fmt.Errorf("create file error: %v", err)
+				fmt.Errorf("handle file error: %v", err)
 			}
-			// 最新アジェンダのみ作成
-			break
+			return
 		}
 	}
 }
