@@ -147,7 +147,7 @@ func searchFileFromMessage(part []*gmail.MessagePart, ms *gmail.Message, srv *gm
 	return nil, nil
 }
 
-func (fl *file) handleFile() error {
+func (fl *file) handleFile(token *token) error {
 	fileIsLatest, err := fl.isLatestFile()
 	if err != nil {
 		fmt.Errorf("file latest error: %v", err)
@@ -160,6 +160,10 @@ func (fl *file) handleFile() error {
 		err = fl.createFile()
 		if err != nil {
 			fmt.Errorf("create file error: %v", err)
+		}
+		err = fl.postSlack(token)
+		if err != nil {
+			fmt.Errorf("slack error: %v", err)
 		}
 	}
 	return nil
@@ -208,13 +212,9 @@ func task() {
 			fmt.Errorf("search file error: %v", err)
 		}
 		if fl != nil {
-			err = fl.handleFile()
+			err = fl.handleFile(token)
 			if err != nil {
 				fmt.Errorf("handle file error: %v", err)
-			}
-			err = fl.postSlack(token)
-			if err != nil {
-				fmt.Errorf("slack error: %v", err)
 			}
 			return
 		}
