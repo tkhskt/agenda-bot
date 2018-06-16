@@ -2,6 +2,8 @@
 
 メールで共有されたアジェンダをslackのagendaチャンネルに流すbot
 
+10分に1度gmailのinboxをチェックしてagendaが上がってないかチェックします
+
 ## Install
 
 `go get github.com/gericass/agenda-bot`
@@ -24,4 +26,8 @@
 2. `filename.txt`の作成
 
 `touch filename.txt`
+
+## Usage
+
+`go run agenda.go`
 
