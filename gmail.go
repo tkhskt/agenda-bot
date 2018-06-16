@@ -8,13 +8,31 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/gmail/v1"
+	"io/ioutil"
+	"encoding/json"
 )
+
+type token struct {
+	ClientId     string `json:"clientId"`
+	ClientSecret string `json:"clientSecret"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
 
 func main() {
 
+	t, err := ioutil.ReadFile("./token.json")
+	if err != nil {
+		fmt.Errorf("%v", err)
+	}
+
+	var tk token
+
+	json.Unmarshal(t, &tk)
+
 	config := oauth2.Config{
-		ClientID:     "",
-		ClientSecret: "",
+		ClientID:     tk.ClientId,
+		ClientSecret: tk.ClientSecret,
 		Endpoint:     google.Endpoint,
 		RedirectURL:  "urn:ietf:wg:oauth:2.0:oob",          //今回はリダイレクトしないためこれ
 		Scopes:       []string{"https://mail.google.com/"}, //必要なスコープを追加
@@ -22,9 +40,9 @@ func main() {
 
 	expiry, _ := time.Parse("2006-01-02", "2018-06-16")
 	token := oauth2.Token{
-		AccessToken:  "",
+		AccessToken:  tk.AccessToken,
 		TokenType:    "Bearer",
-		RefreshToken: "",
+		RefreshToken: tk.RefreshToken,
 		Expiry:       expiry,
 	}
 
