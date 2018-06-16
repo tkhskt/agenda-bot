@@ -13,6 +13,7 @@ import (
 	"errors"
 	"os"
 	"github.com/nlopes/slack"
+	"github.com/jasonlvhit/gocron"
 )
 
 type token struct {
@@ -167,11 +168,10 @@ func (fl *file) handleFile() error {
 func (fl *file) postSlack(token *token) error {
 	api := slack.New(token.SlackToken)
 	file := slack.FileUploadParameters{
-		File:           "./file/" + fl.filename,
-		Filetype:       "pdf",
-		InitialComment: "agenda",
-		Title:          fl.filename,
-		Channels:       []string{token.SlackChannel},
+		File:     "./file/" + fl.filename,
+		Filetype: "pdf",
+		Title:    fl.filename,
+		Channels: []string{token.SlackChannel},
 	}
 	_, err := api.UploadFile(file)
 	if err != nil {
@@ -180,7 +180,8 @@ func (fl *file) postSlack(token *token) error {
 	return nil
 }
 
-func main() {
+func task() {
+	defer fmt.Println("done task")
 	token, err := getToken()
 	if err != nil {
 		fmt.Errorf("token error: %v", err)
@@ -218,4 +219,9 @@ func main() {
 			return
 		}
 	}
+}
+
+func main() {
+	gocron.Every(10).Minutes().Do(task)
+	<-gocron.Start()
 }
