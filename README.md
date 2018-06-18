@@ -2,7 +2,7 @@
 
 メールで共有されたアジェンダをslackのagendaチャンネルに流すbot
 
-10分に1度gmailのinboxをチェックしてagendaが上がってないかチェックします
+1分おきにgmailのinboxをチェックしてagendaが上がってないかチェックします
 
 ## Install
 

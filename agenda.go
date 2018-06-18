@@ -222,6 +222,6 @@ func task() {
 }
 
 func main() {
-	gocron.Every(10).Minutes().Do(task)
+	gocron.Every(1).Minute().Do(task)
 	<-gocron.Start()
 }
