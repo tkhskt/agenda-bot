@@ -19,7 +19,8 @@
   "accessToken": "google APIのaccessToken",
   "refreshToken": "google APIのrefreshToken",
   "slackToken": "slackのtoken",
-  "slackChannel": "slackのChannelId"
+  "agendaChannel": "slackのagendaを上げるchannelId"
+  "shuhoChannel": "slackの週報リマインドをするchannelId"
 }
 ```
 
