@@ -17,12 +17,13 @@ import (
 )
 
 type token struct {
-	ClientId     string `json:"clientId"`
-	ClientSecret string `json:"clientSecret"`
-	AccessToken  string `json:"accessToken"`
-	RefreshToken string `json:"refreshToken"`
-	SlackToken   string `json:"slackToken"`
-	SlackChannel string `json:"slackChannel"`
+	ClientId      string `json:"clientId"`
+	ClientSecret  string `json:"clientSecret"`
+	AccessToken   string `json:"accessToken"`
+	RefreshToken  string `json:"refreshToken"`
+	SlackToken    string `json:"slackToken"`
+	AgendaChannel string `json:"agendaChannel"`
+	ShuhoChannel  string `json:"shuhoChannel"`
 }
 
 type file struct {
@@ -172,11 +173,11 @@ func (fl *file) handleFile(token *token) error {
 func (fl *file) postSlack(token *token) error {
 	api := slack.New(token.SlackToken)
 	file := slack.FileUploadParameters{
-		File:     "./file/" + fl.filename,
-		Filetype: "pdf",
+		File:           "./file/" + fl.filename,
+		Filetype:       "pdf",
 		InitialComment: "会議がんばれ❤️",
-		Title:    fl.filename,
-		Channels: []string{token.SlackChannel},
+		Title:          fl.filename,
+		Channels:       []string{token.AgendaChannel},
 	}
 	_, err := api.UploadFile(file)
 	if err != nil {
@@ -185,7 +186,7 @@ func (fl *file) postSlack(token *token) error {
 	return nil
 }
 
-func task() {
+func agenda() {
 	defer fmt.Println("done task")
 	token, err := getToken()
 	if err != nil {
@@ -223,6 +224,7 @@ func task() {
 }
 
 func main() {
-	gocron.Every(1).Minute().Do(task)
+	gocron.Every(1).Monday().At("11:00").Do(remindShuho)
+	gocron.Every(1).Minute().Do(agenda)
 	<-gocron.Start()
 }
