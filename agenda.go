@@ -223,6 +223,19 @@ func agenda() {
 	}
 }
 
+func remindShuho() {
+	token, err := getToken()
+	if err != nil {
+		fmt.Errorf("shuho token error: %v", err)
+	}
+	client := slack.New(token.SlackToken)
+	_, _, err = client.PostMessage(token.ShuhoChannel, "みんなもう週報出した？", slack.PostMessageParameters{})
+	if err != nil {
+		fmt.Errorf("shuho post error: %v", err)
+	}
+}
+
+
 func main() {
 	gocron.Every(1).Monday().At("11:00").Do(remindShuho)
 	gocron.Every(1).Minute().Do(agenda)
