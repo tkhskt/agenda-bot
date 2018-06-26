@@ -113,12 +113,12 @@ func getFileFromMessage(part *gmail.MessagePart, srv *gmail.Service, ms *gmail.M
 }
 
 func (fl *file) saveFileName() error {
-	file, err := os.Create(`filename.txt`)
+	file, err := os.OpenFile("filename.txt", os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
-	file.Write(([]byte)(fl.filename))
+	file.Write(([]byte)(fl.filename + "\n"))
 	return nil
 }
 
@@ -127,11 +127,10 @@ func (fl *file) isLatestFile() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if string(b) != fl.filename {
-		return true, nil
+	if strings.Contains(string(b), fl.filename) {
+		return false, nil
 	}
-
-	return false, nil
+	return true, nil
 }
 
 func searchFileFromMessage(part []*gmail.MessagePart, ms *gmail.Message, srv *gmail.Service) (*file, error) {
@@ -218,7 +217,6 @@ func agenda() {
 			if err != nil {
 				fmt.Errorf("handle file error: %v", err)
 			}
-			return
 		}
 	}
 }
@@ -234,7 +232,6 @@ func remindShuho() {
 		fmt.Errorf("shuho post error: %v", err)
 	}
 }
-
 
 func main() {
 	gocron.Every(1).Monday().At("11:00").Do(remindShuho)
