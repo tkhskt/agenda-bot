@@ -135,7 +135,7 @@ func (fl *file) isLatestFile() (bool, error) {
 
 func searchFileFromMessage(part []*gmail.MessagePart, ms *gmail.Message, srv *gmail.Service) (*file, error) {
 	for _, v := range part {
-		if strings.Contains(v.Filename, "アジェンダ") {
+		if strings.Contains(v.Filename, "アジェンダ") || strings.Contains(v.Filename, "アジェンダ") {
 			dec, err := getFileFromMessage(v, srv, ms)
 			if err != nil {
 				return nil, err
