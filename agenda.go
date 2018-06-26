@@ -174,7 +174,7 @@ func (fl *file) postSlack(token *token) error {
 	file := slack.FileUploadParameters{
 		File:           "./file/" + fl.filename,
 		Filetype:       "pdf",
-		InitialComment: "会議がんばれ❤️",
+		InitialComment: "バグ治ったから許して😭️",
 		Title:          fl.filename,
 		Channels:       []string{token.AgendaChannel},
 	}
