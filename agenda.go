@@ -202,6 +202,10 @@ func agenda() {
 	if err != nil {
 		fmt.Errorf("get message list error: %v", err)
 	}
+	if r == nil {
+		fmt.Println("messages nil")
+		return
+	}
 
 	for _, v := range r.Messages {
 		ms, err := ums.Get("me", v.Id).Do()
